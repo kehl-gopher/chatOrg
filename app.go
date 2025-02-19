@@ -3,16 +3,33 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
 // handle FAQ creation
 func createFaq(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "welcome to faq")
+
+	body, err := io.ReadAll(r.Body)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(string(body))
+	json.NewEncoder(w).Encode(body)
 }
 
 func webHook(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "webhook")
+	body, err := io.ReadAll(r.Body)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(string(body))
+
+	json.NewEncoder(w).Encode(body)
 }
 
 func appIntegration(w http.ResponseWriter, r *http.Request) {
