@@ -7,11 +7,6 @@ import (
 )
 
 func DotEnv(key string) string {
-	err := godotenv.Load()
-
-	if err != nil {
-		panic(err)
-	}
-
+	godotenv.Load()
 	return os.Getenv(key)
 }

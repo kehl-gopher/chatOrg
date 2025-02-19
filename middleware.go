@@ -1,5 +1,4 @@
 package main
-
 import "net/http"
 
 // setup cors middleware to  be open for telex
