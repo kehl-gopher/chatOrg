@@ -15,5 +15,7 @@ func routers() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/api/v1/webhook", webHook)
 
 	router.HandlerFunc(http.MethodGet, "/integrations", appIntegration)
-	return router
+
+	router.HandlerFunc(http.MethodGet, "/ping", ping)
+	return CorsMiddleWare(router)
 }
