@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"telex-chat/internal/env"
 )
 
 // handle FAQ creation
@@ -71,8 +72,8 @@ func appIntegration(w http.ResponseWriter, r *http.Request) {
 					"default":  "",
 				},
 			},
-			"target_url": "https://rfs7htn4-4000.uks1.devtunnels.ms/api/v1/webhook",
-			"tick_url":   "https://rfs7htn4-4000.uks1.devtunnels.ms/api/v1/webhook",
+			"target_url": env.DotEnv("TARGET_URL"),
+			"tick_url":   env.DotEnv("TICK_URL"),
 		},
 	}
 
