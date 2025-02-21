@@ -6,16 +6,17 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func routers() http.Handler {
+func (app *application) routers() http.Handler {
 
 	router := httprouter.New()
 
-	router.HandlerFunc(http.MethodPost, "/api/v1/about", createFaq)
+	router.HandlerFunc(http.MethodPost, "/api/v1/company", app.RegisterCompany)
+	router.HandlerFunc(http.MethodPost, "/api/v1/about", app.AboutEndpoint)
+	router.HandlerFunc(http.MethodPost, "/api/v1/chat", app.HandleChat)
 
-	router.HandlerFunc(http.MethodPost, "/api/v1/webhook", webHook)
+	// router.HandlerFunc(http.MethodPost, "/api/v1/webhook", app.webHook)
 
-	router.HandlerFunc(http.MethodGet, "/integrations", appIntegration)
-
+	router.HandlerFunc(http.MethodGet, "/integrations", app.appIntegration)
 	router.HandlerFunc(http.MethodGet, "/ping", ping)
-	return CorsMiddleWare(router)
+	return app.recoverMiddleware(corsMiddleWare(router))
 }
