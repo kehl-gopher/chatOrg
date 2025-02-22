@@ -296,8 +296,8 @@ func (app *application) appIntegration(w http.ResponseWriter, r *http.Request) {
 					"default":  "fe0e09ecda000917df2eda0d87208a92",
 				},
 			},
-			"target_url": "https://unchanged-tawnya-hng-c6a8014b.koyeb.app/chat",
-			"tick_url":   "https://unchanged-tawnya-hng-c6a8014b.koyeb.app/tick",
+			"target_url": "https://unchanged-tawnya-hng-c6a8014b.koyeb.app/api/v1/chat",
+			"tick_url":   "https://unchanged-tawnya-hng-c6a8014b.koyeb.app/api/v1/tick",
 		},
 	}
 	app.writeResponse(w, http.StatusOK, data)
