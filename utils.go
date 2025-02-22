@@ -12,8 +12,8 @@ import (
 )
 
 var ErrSettings = errors.New("settings field is required")
-var ErrAuthorization = errors.New("Authorization label is required")
-var ErrSettingsField = errors.New("Field label cannot be empty")
+var ErrAuthorization = errors.New("authorization label is required")
+var ErrSettingsField = errors.New("field label cannot be empty")
 
 type toJson map[string]interface{}
 
