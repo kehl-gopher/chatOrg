@@ -34,6 +34,17 @@ The chatbot is a  feature of the **Telex** platform, enabling businesses to leve
 - **Method:** `POST`
 - **Handler:** `app.RegisterCompany`
 
+```sh
+url -iX POST "http://localhost:4000/api/v1/company" \
+     -H "Content-Type: application/json" \
+     -d '{"name": "ExampleCorp", "email": "company1234@example.com"}'
+```
+```json
+{"company":{"id":"cusssc1d12354i9649i0",
+"name":"ExampleCorp",
+"email":"company133234@example.com","api_key":"e4586384fd37ccad237f1f588d475eab84f41013bc731969d20e9cdb12db2a24145e1e46de568eeb"},
+"message":"Company registered successfully"}   
+```
 ### 2. Add Company Information (About Section)
 - **Endpoint:** `/api/v1/about`
 - **Method:** `POST`
