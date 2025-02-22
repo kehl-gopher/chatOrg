@@ -1,22 +1,23 @@
 # AI FAQ Chatbot Documentation
 
 ## Overview
-The AI FAQ chatbot is designed to assist users by providing relevant answers based on a company's documentation and manually entered information. It utilizes OpenAI embeddings and GPT-based responses to ensure accurate and relevant responses.
+chatOrg is a powerful customer support tool that helps businesses automate responses to common inquiries. It is integrated with **Telex**, an AI-powered chatbot system that allows organizations to provide seamless customer experiences using their own documentation and manually entered information.
 
 ## Purpose
-The chatbot is part of the Telex integration application, allowing companies to set up an AI-driven FAQ system. By integrating with Telex, businesses can automate responses to common inquiries using their uploaded documents and manually entered data.
+The chatbot is a  feature of the **Telex** platform, enabling businesses to leverage AI for answering frequently asked questions. Companies can enhance customer interactions by integrating their documentation and textual descriptions into the chatbot system, ensuring precise and relevant responses.
 
 ## Features
 1. **Company Data Sources**
-   - Companies can **upload a document** (accepted formats: PDF, TXT, DOCX). The document size must not exceed **10MB**.
-   - Companies can **manually enter textual descriptions** of their services.
-   - Companies can use **both** data sources for better response accuracy.
+   - Businesses can **upload a document** (Accepted formats: PDF, TXT, DOCX). The document size must not exceed **10MB**.
+   - Companies can **manually enter textual descriptions** of their services for AI reference.
+   - Both sources can be combined for enhanced response accuracy.
 
-***NOTE PDF uploaded is not yet fully supported***
-***NOTE File upload is not yet supported document are currently read and stored in DB for embeddings***
+**⚠️ NOTE:**
+- **PDF upload is not fully supported yet.**
+- **File upload is not supported currently; documents are processed and stored in the database for embeddings.**
 
 2. **Processing Flow**
-   - When a company uploads a document, the system **extracts text** from it.
+   - When a document is uploaded, the system **extracts text** from it.
    - Extracted text and manually entered descriptions are **stored as embeddings** in the database.
    - When a user asks a question, the chatbot uses **OpenAI embeddings** to find the most relevant context and passes it to **GPT** to generate a response.
 
@@ -44,19 +45,19 @@ The chatbot is part of the Telex integration application, allowing companies to 
 - **Request Body:**
   ```json
   {
-    "about": "Telex gives developers a 90% royalty on their app integration while Telex takes 10%. Telex is affordable, costing only $100 for integration."
+    "about": "Telex allows developers to earn 90% royalties on app integrations while Telex takes 10%. The service is affordable, costing only $100 for integration."
   }
   ```
 - **Example Curl Command:**
   ```sh
-  curl -iX POST "http://localhost:4000/api/v1/about" \
+  curl -X POST "https://api.telex.im/v1/about" \
        -H "Content-Type: application/json" \
        -H "Authorization: 32739ab80316e48bca1f10a338a1fca7" \
-       -d '{ "about": "Telex gives developers a 90% royalty on their app integration..." }'
+       -d '{ "about": "Telex allows developers to earn 90% royalties on app integrations..." }'
   ```
 - **Responses:**
-  - **Success:** `{ "message": "company info added successfully" }`
-  - **Error (Invalid API Key):** `{ "message": "invalid api key" }`
+  - **Success:** `{ "message": "Company info added successfully" }`
+  - **Error (Invalid API Key):** `{ "message": "Invalid API key" }`
 
 ### 3. Upload a Document
 - **Endpoint:** `/api/v1/document`
@@ -68,17 +69,17 @@ The chatbot is part of the Telex integration application, allowing companies to 
   - Max size: 10MB
 - **Example Curl Command:**
   ```sh
-  curl -iX POST "http://localhost:4000/api/v1/document" \
+  curl -X POST "https://api.telex.im/v1/document" \
        -H "Content-Type: application/json" \
        -H "Authorization: 32739ab80316e48bca1f10a338a1fca7" \
        -F "document=@path/to/file.pdf"
   ```
 - **Responses:**
-  - **Success:** `{ "message": "document uploaded successfully" }`
-  - **Error (Invalid API Key):** `{ "message": "invalid api key" }`
+  - **Success:** `{ "message": "Document uploaded successfully" }`
+  - **Error (Invalid API Key):** `{ "message": "Invalid API key" }`
 
 ### 4. Query the Chatbot
-- **Endpoint:** `/api/v1/chat`
+- **Endpoint:** `/api/v1/chatorg/query`
 - **Method:** `POST`
 - **Headers:**
   ```
@@ -88,15 +89,32 @@ The chatbot is part of the Telex integration application, allowing companies to 
 - **Request Body:**
   ```json
   {
-    "query": "Tell me about Telex"
+    "message": "hi",
+    "settings": [
+      {
+        "Label": "Authorization",
+        "Type": "text",
+        "Default": "fe0e09ecda000917df2eda0d87208a92",
+        "Required": true
+      }
+    ]
   }
   ```
 - **Example Curl Command:**
   ```sh
-  curl -iX POST "http://localhost:4000/api/v1/chat" \
+  curl -X POST "https://api.telex.im/v1/chatorg/query" \
        -H "Content-Type: application/json" \
-       -H "Authorization: 32739ab80316e48bca1f10a338a1fca7" \
-       -d '{ "query": "Tell me about Telex" }'
+       -d '{
+             "message": "hi",
+             "settings": [
+               {
+                 "Label": "Authorization",
+                 "Type": "text",
+                 "Default": "fe0e09ecda000917df2eda0d87208a92",
+                 "Required": true
+               }
+             ]
+           }'
   ```
 - **Responses:**
   - **Success:**
@@ -104,17 +122,18 @@ The chatbot is part of the Telex integration application, allowing companies to 
     {
       "message": "Chat response generated successfully",
       "response": {
-        "response": "Telex is a software integration company that simplifies API connectivity for businesses, offering flexible and scalable solutions."
+        "response": "Telex is an AI-driven software integration platform that simplifies customer interactions using AI-powered chatbots."
       }
     }
     ```
-  - **Error (Invalid API Key):** `{ "message": "invalid api key" }`
+  - **Error (Invalid API Key):** `{ "message": "Invalid API key" }`
 
-## Integration with Telex
-To integrate the chatbot with Telex:
+## Integration with Telex ChatOrg
+To integrate the chatbot with Telex ChatOrg:
 1. **Create a Telex account**: [https://telex.im/](https://telex.im/)
 2. **Enable ChatOrg**: Navigate to **Settings** > **Enable ChatOrg**.
 3. **Manage Apps**: Go to **Manage Apps** and set up your API keys.
 
 ## Conclusion
-This AI FAQ chatbot enables businesses to automate their customer support by leveraging their own data. By combining document uploads and manual text entries, the chatbot ensures accurate responses using OpenAI's powerful AI models.
+The **Telex ChatOrg AI FAQ chatbot** allows businesses to automate customer support using AI-powered responses. By leveraging **document uploads and manual text entries**, the chatbot ensures accurate responses based on company-specific data, improving efficiency and customer satisfaction.
+
