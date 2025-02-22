@@ -12,6 +12,8 @@ The chatbot is part of the Telex integration application, allowing companies to 
    - Companies can **manually enter textual descriptions** of their services.
    - Companies can use **both** data sources for better response accuracy.
 
+**NOTE** PDF uploaded is not yet fully supported
+
 2. **Processing Flow**
    - When a company uploads a document, the system **extracts text** from it.
    - Extracted text and manually entered descriptions are **stored as embeddings** in the database.
