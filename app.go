@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 	"telex-chat/internal/data"
@@ -88,6 +87,8 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 
 	var doc data.Document
 
+	// var filePath string
+
 	com, err := app.VerifyAPIKey(r.Header.Get("Authorization"))
 	if err != nil {
 		if errors.Is(err, models.ErrAPiKey) {
@@ -98,12 +99,16 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files
-	r.ParseMultipartForm(10 << 20)
+	// Parse our multipart form, 10 << 20 specifies a maximum upload of 5 MB files
+	err = r.ParseMultipartForm(5 << 20)
+	if err != nil {
+		app.badErrorResponse(w, toJson{"error": "File too large must not be more than 5MB"})
+		return
+	}
+
 	file, header, err := r.FormFile("document")
 
 	if err != nil {
-		log.Println(err)
 		app.serverErrorResponse(w, err)
 		return
 	}
@@ -117,24 +122,12 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filepath := fmt.Sprintf("uploads/%s_%s.%s", strings.Split(header.Filename, ".")[0], env.GetID(), ext)
-	outFile, err := os.Create(filepath)
-
+	reader, err := io.ReadAll(file)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 		return
 	}
-
-	defer outFile.Close()
-
-	_, err = io.Copy(outFile, file)
-
-	if err != nil {
-		app.serverErrorResponse(w, err)
-		return
-	}
-
-	content, err := data.GetContentFromFile(filepath, ext)
+	content, err := GetContentFromFile(reader, ext)
 
 	if err != nil {
 		app.serverErrorResponse(w, err)
@@ -147,7 +140,7 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	doc.ID = env.GetID()
-	doc.DocumentPath = filepath
+	// doc.DocumentPath = filePath
 	doc.CompanyID = com.ID
 	doc.Content = content
 	doc.Embedding = EmbeddingToString(emb)

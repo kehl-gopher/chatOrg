@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-var ErrAPiKey = errors.New("API key not found")
-var ErrEmailExist = errors.New("Email already exists")
+var ErrAPiKey = errors.New("api key not found")
+var ErrEmailExist = errors.New("email already exists")
 
 type NewDB struct {
 	Db *sql.DB
@@ -141,8 +141,8 @@ func (db *NewDB) AddDocument(doc data.Document) error {
 		tx.Commit()
 	}()
 
-	_, err = tx.ExecContext(ctx, "INSERT INTO documents (id, doc_path, content, company_id) VALUES ($1, $2, $3, $4)",
-		doc.ID, doc.DocumentPath, doc.Content, doc.CompanyID)
+	_, err = tx.ExecContext(ctx, "INSERT INTO documents (id,  content, company_id) VALUES ($1, $2, $3)",
+		doc.ID, doc.Content, doc.CompanyID)
 
 	if err != nil {
 		return err

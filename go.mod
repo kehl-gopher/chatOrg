@@ -10,17 +10,20 @@ require (
 require github.com/lib/pq v1.10.9
 
 require (
+	github.com/cloudinary/cloudinary-go/v2 v2.9.1
+	github.com/nguyenthenguyen/docx v0.0.0-20230621112118-9c8e795a11db
 	github.com/rs/xid v1.6.0
 	github.com/sashabaranov/go-openai v1.37.0
-	github.com/unidoc/unioffice v1.39.0
 	github.com/unidoc/unipdf/v3 v3.66.0
 )
 
 require (
+	github.com/creasty/defaults v1.7.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+	github.com/google/uuid v1.5.0 // indirect
+	github.com/gorilla/schema v1.4.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/richardlehane/msoleps v1.0.3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/unidoc/freetype v0.2.3 // indirect

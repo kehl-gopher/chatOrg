@@ -20,11 +20,11 @@ type About struct {
 }
 
 type Document struct {
-	ID           string `json:"id,omitempty"`
-	Content      string `json:"content"`
-	DocumentPath string `json:"document_path"`
-	Embedding    string `json:"embedding"`
-	CompanyID    string `json:"company_id,omitempty"`
+	ID      string `json:"id,omitempty"`
+	Content string `json:"content"`
+	// DocumentPath string `json:"document_path"`
+	Embedding string `json:"embedding"`
+	CompanyID string `json:"company_id,omitempty"`
 }
 type Settings struct {
 	Label    string `json:"label"`
