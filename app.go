@@ -155,6 +155,16 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	app.writeResponse(w, http.StatusCreated, toJson{"message": "Document added successfully"})
 }
 
+type Query struct {
+	Message  string `json:"message"`
+	Settings []struct {
+		Label    string `json:"label"`
+		Type     string `json:"type"`
+		Default  string `json:"default"`
+		Required bool   `json:"required"`
+	} `json:"settings"`
+}
+
 // HandleChat handles the chat endpoint
 func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 
@@ -191,34 +201,32 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 	Your priority is to deliver fast, accurate, and engaging responses that enhance the user’s experience while representing [Company Name] professionally
 	`
 	// process query request coming from telex
-	var Query struct {
-		Message  string `json:"message"`
-		Settings []struct {
-			Label    string `json:"label"`
-			Type     string `json:"type"`
-			Default  string `json:"default"`
-			Required bool   `json:"required"`
-		} `json:"settings"`
-	}
 
-	err := ReadJson(r, &Query)
+	query := Query{}
+	err := ReadJson(r, &query)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 		return
 	}
 
-	log.Printf("Query: %+v\n", Query)
-	app.writeResponse(w, http.StatusOK, toJson{"message": "Chat response generated successfully", "response": Query.Message})
-
-	com, err := app.model.Model.GetAPIKey(Query.Settings[0].Label)
+	com, err := app.ProcessSettings(query)
 	if err != nil {
-		if errors.Is(err, models.ErrAPiKey) {
-			app.badErrorResponse(w, "Invalid API key provided")
-			return
-		}
-		app.serverErrorResponse(w, err)
+		app.badErrorResponse(w, err.Error())
 		return
 	}
+
+	// log.Printf("Query: %+v\n", query)
+	// app.writeResponse(w, http.StatusOK, toJson{"message": "Chat response generated successfully", "response": query.Message})
+
+	// com, err := app.model.Model.GetAPIKey(query.Settings[0].Label)
+	// if err != nil {
+	// 	if errors.Is(err, models.ErrAPiKey) {
+	// 		app.badErrorResponse(w, "Invalid API key provided")
+	// 		return
+	// 	}
+	// 	app.serverErrorResponse(w, err)
+	// 	return
+	// }
 
 	// com, err := app.VerifyAPIKey(r.Header.Get("Authorization"))
 
@@ -230,7 +238,8 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 	// 	app.serverErrorResponse(w, err)
 	// }
 
-	queryEmbedding, err := app.GenerateEmbeddings(Query.Message)
+	message := ProcessMessage(query.Message)
+	queryEmbedding, err := app.GenerateEmbeddings(message)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 		return
@@ -247,7 +256,7 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 		Model: openai.GPT4,
 		Messages: []openai.ChatCompletionMessage{
 			{Role: "system", Content: prompt},
-			{Role: "user", Content: fmt.Sprintf("Here is what we know about the company: %s\nUser Question: %s", knowledge, Query.Message)},
+			{Role: "user", Content: fmt.Sprintf("Here is what we know about the company: %s\nUser Question: %s", knowledge, query.Message)},
 		},
 	})
 
@@ -262,7 +271,8 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 		Response: resp.Choices[0].Message.Content,
 	}
 
-	app.writeResponse(w, http.StatusOK, toJson{"message": "Chat response generated successfully", "response": Response})
+	log.Println("Successful response from OpenAI")
+	app.writeResponse(w, http.StatusOK, toJson{"bot": Response})
 
 }
 

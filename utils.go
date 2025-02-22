@@ -6,16 +6,46 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"telex-chat/internal/data"
 	"telex-chat/internal/models"
 )
 
+var ErrSettings = errors.New("settings field is required")
+var ErrAuthorization = errors.New("Authorization label is required")
+var ErrSettingsField = errors.New("Field label cannot be empty")
+
 type toJson map[string]interface{}
 
-func ProcessSettings() {
+func (app *application) ProcessSettings(jsonD Query) (*data.Company, error) {
 
+	var authToken string
+
+	if jsonD.Settings == nil {
+		return nil, ErrSettings
+	}
+
+	for _, settings := range jsonD.Settings {
+
+		if settings.Label != "Authorization" {
+			return nil, ErrAuthorization
+		}
+
+		if settings.Default == "" {
+			return nil, ErrSettingsField
+		} else {
+			authToken = settings.Default
+			break
+		}
+
+	}
+	return app.VerifyAPIKey(authToken)
 }
 
+func ProcessMessage(message string) string {
+	m := strings.TrimPrefix(message, "<p>")
+	return strings.TrimSuffix(m, "</p>")
+}
 func ReadJson(r *http.Request, toStruct interface{}) error {
 	dec := json.NewDecoder(r.Body)
 
