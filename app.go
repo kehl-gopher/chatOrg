@@ -190,27 +190,45 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 	Let me know if you'd like further details!"_
 	Your priority is to deliver fast, accurate, and engaging responses that enhance the user’s experience while representing [Company Name] professionally
 	`
-	com, err := app.VerifyAPIKey(r.Header.Get("Authorization"))
+	// process query request coming from telex
+	var Query struct {
+		Message  string `json:"message"`
+		Settings struct {
+			Authorization string `json:"Authorization"`
+			Type          string `json:"type"`
+			Default       string `json:"default"`
+		}
+	}
 
+	err := ReadJson(r, &Query)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	app.writeResponse(w, http.StatusOK, toJson{"message": "Chat response generated successfully", "response": Query.Message})
+
+	com, err := app.model.Model.GetAPIKey(Query.Settings.Authorization)
 	if err != nil {
 		if errors.Is(err, models.ErrAPiKey) {
 			app.badErrorResponse(w, "Invalid API key provided")
 			return
 		}
 		app.serverErrorResponse(w, err)
-	}
-
-	var Query struct {
-		Query string `json:"query"`
-	}
-
-	err = ReadJson(r, &Query)
-	if err != nil {
-		app.serverErrorResponse(w, err)
 		return
 	}
 
-	queryEmbedding, err := app.GenerateEmbeddings(Query.Query)
+	// com, err := app.VerifyAPIKey(r.Header.Get("Authorization"))
+
+	// if err != nil {
+	// 	if errors.Is(err, models.ErrAPiKey) {
+	// 		app.badErrorResponse(w, "Invalid API key provided")
+	// 		return
+	// 	}
+	// 	app.serverErrorResponse(w, err)
+	// }
+
+	queryEmbedding, err := app.GenerateEmbeddings(Query.Message)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 		return
@@ -227,7 +245,7 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 		Model: openai.GPT4,
 		Messages: []openai.ChatCompletionMessage{
 			{Role: "system", Content: prompt},
-			{Role: "user", Content: fmt.Sprintf("Here is what we know about the company: %s\nUser Question: %s", knowledge, Query.Query)},
+			{Role: "user", Content: fmt.Sprintf("Here is what we know about the company: %s\nUser Question: %s", knowledge, Query.Message)},
 		},
 	})
 
@@ -250,47 +268,39 @@ func (app *application) appIntegration(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"data": map[string]interface{}{
 			"date": map[string]string{
-				"created_at": "2025-02-19",
-				"updated_at": "2025-02-19",
+				"created_at": "2025-02-22",
+				"updated_at": "2025-02-22",
 			},
 			"descriptions": map[string]string{
-				"app_name":         "chatMe",
-				"app_description":  "The chatMe is an AI-powered assistant designed to provide instant, accurate responses to frequently asked questions (FAQs) about a company or service. It integrates seamlessly with websites, allowing businesses to automate customer support, \nreduce response times, and enhance user experience.\n\nThis chatbot leverages OpenAI’s GPT models to generate natural and context-aware responses based on preloaded FAQs or dynamically scraped information from a company’s website. It supports real-time learning by fetching and analyzing website content, ensuring up-to-date responses.",
-				"app_logo":         "https://i.postimg.cc/Dwr2m6vY/meetme.png",
-				"app_url":          "https://rfs7htn4-4000.uks1.devtunnels.ms",
+				"app_name":         "chatOrg",
+				"app_description":  "The AI FAQ Chatbot helps organizations provide instant, accurate answers to customer inquiries using their own data. By integrating documents and manual inputs, it automates support, reduces response time, and enhances customer satisfaction effortlessly.",
+				"app_logo":         "https://as2.ftcdn.net/v2/jpg/12/13/39/93/1000_F_1213399398_I4M3xm84LUZSAuI5llmxa2IPIBi34Mow.jpg",
+				"app_url":          "https://unchanged-tawnya-hng-c6a8014b.koyeb.app",
 				"background_color": "#fff",
 			},
-			"is_active":        true,
-			"integration_type": "modifier",
-			"key_features": []string{
-				"Plug-and-Play Integration",
-				"Automated Knowledge Extraction",
-				"Natural Language Processing (NLP)",
-				"Multi-Channel Support",
-			},
-			"author":               "Darasimi",
+			"is_active":            true,
+			"integration_type":     "modifier",
 			"integration_category": "Communication & Collaboration",
+			"key_features": []string{
+				"Smart Responses",
+				"Document Integration",
+				"Manual Input",
+				"AI-Powered Search",
+			},
+			"author": "Darasimi",
 			"settings": []map[string]interface{}{
 				{
-					"label":    "web_link",
+					"label":    "Authorization",
 					"type":     "text",
 					"required": true,
-					"default":  "",
-				},
-				{
-					"label":    "input",
-					"type":     "text",
-					"required": true,
-					"default":  "",
+					"default":  "fe0e09ecda000917df2eda0d87208a92",
 				},
 			},
-			"target_url": env.DotEnv("TARGET_URL"),
-			"tick_url":   env.DotEnv("TICK_URL"),
+			"target_url": "https://unchanged-tawnya-hng-c6a8014b.koyeb.app/chat",
+			"tick_url":   "https://unchanged-tawnya-hng-c6a8014b.koyeb.app/tick",
 		},
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	app.writeResponse(w, http.StatusOK, data)
 }
 
 func ping(w http.ResponseWriter, r *http.Request) {
