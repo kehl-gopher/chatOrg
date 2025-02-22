@@ -12,6 +12,10 @@ import (
 
 type toJson map[string]interface{}
 
+func ProcessSettings() {
+
+}
+
 func ReadJson(r *http.Request, toStruct interface{}) error {
 	dec := json.NewDecoder(r.Body)
 
