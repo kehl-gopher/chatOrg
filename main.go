@@ -30,8 +30,8 @@ func main() {
 	mux := &http.Server{
 		Addr:         fmt.Sprintf(":%d", 4000),
 		Handler:      app.routers(),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  2 * time.Minute,
 	}
 

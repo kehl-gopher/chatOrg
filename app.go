@@ -36,6 +36,10 @@ func (app *application) RegisterCompany(w http.ResponseWriter, r *http.Request) 
 
 	comp, err := app.model.Model.AddCompany(company)
 	if err != nil {
+		if errors.Is(err, models.ErrEmailExist) {
+			app.badErrorResponse(w, "Company with this email already exists")
+			return
+		}
 		app.serverErrorResponse(w, err)
 		return
 	}
@@ -91,6 +95,7 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		app.serverErrorResponse(w, err)
+		return
 	}
 
 	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files
@@ -98,7 +103,8 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	file, header, err := r.FormFile("document")
 
 	if err != nil {
-		http.Error(w, "Invalid file provided", http.StatusBadRequest)
+		log.Println(err)
+		app.serverErrorResponse(w, err)
 		return
 	}
 
@@ -107,16 +113,15 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	ext := strings.ToLower(filepath.Ext(header.Filename))
 
 	if ext != ".pdf" && ext != ".docx" && ext != ".csv" && ext != ".txt" {
-		http.Error(w, "Invalid file format provided", http.StatusBadRequest)
+		app.serverErrorResponse(w, err)
 		return
 	}
 
-	filepath := "uploads/" + header.Filename
-
+	filepath := fmt.Sprintf("uploads/%s_%s.%s", strings.Split(header.Filename, ".")[0], env.GetID(), ext)
 	outFile, err := os.Create(filepath)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverErrorResponse(w, err)
 		return
 	}
 
@@ -125,31 +130,72 @@ func (app *application) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	_, err = io.Copy(outFile, file)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverErrorResponse(w, err)
 		return
 	}
 
+	content, err := data.GetContentFromFile(filepath, ext)
+
+	if err != nil {
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	emb, err := app.GenerateEmbeddings(content)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+		return
+	}
 	doc.ID = env.GetID()
 	doc.DocumentPath = filepath
 	doc.CompanyID = com.ID
+	doc.Content = content
+	doc.Embedding = EmbeddingToString(emb)
 
+	err = app.model.Model.AddDocument(doc)
+
+	if err != nil {
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	app.writeResponse(w, http.StatusCreated, toJson{"message": "Document added successfully"})
 }
 
 // HandleChat handles the chat endpoint
 func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 
 	prompt := `
-	You are an AI FAQ assistant for a company. Your purpose is to provide helpful, accurate responses about the company based ONLY on the information provided in the company documentation below.
-	Guidelines:
+	You are an AI-powered FAQ assistant for [Company Name], designed to provide accurate and helpful responses based only on the official company documentation. Your goal is to assist users in a friendly, professional, and personalized manner while staying strictly within the provided information.
 
-	Answer questions directly and concisely using ONLY the provided company information.
-	Make sure you personalize query to the user instead of using the word (user's) you can use the user's name. or use a personalized pronouns to make the user feel comfy
-	If the answer isn't contained in the company information, respond with: "I don't have that specific information. Please contact the app administrator at support@[company-domain].com for assistance."
-	Do not make up or infer information that isn't explicitly stated in the company documentation.
-	Maintain a professional, helpful tone that represents the company well.
-	If a question is unclear, politely ask for clarification.
-	If a question contains multiple parts, address each part if the information is available.
-	Format responses for readability when appropriate (bullet points for lists, etc.)
+	Guidelines for Responses:
+	Accuracy & Relevance
+
+	Answer questions directly and concisely using only the provided company information.
+	If a question includes multiple parts, address each one separately (if the information is available).
+	Do not guess, infer, or fabricate information.
+	 Personalization & Engagement
+
+	Use the user's name (if available) or personalized pronouns to create a warm, engaging experience.
+	Maintain a friendly, helpful, and professional tone that reflects the company’s brand.
+	Make responses clear and structured (use bullet points for lists when appropriate).
+	 Handling Missing Information
+
+	If the answer isn't available in the company documentation, respond with:
+	"I don't have that specific information. Please contact our support team at support@[company-domain].com for assistance."
+	If a question is unclear, politely ask for clarification instead of assuming.
+	 Example Responses for Different Scenarios:
+
+	User asks about a service:
+	"Great question, Alex! [Company Name] offers [brief description of the service]. If you need more details, let me know!"
+	User asks about an unavailable topic:
+	"I don't have that specific information, but you can reach out to our support team at support@[company-domain].com for assistance."
+	User asks a multi-part question:
+	"Good question, Sarah! Here's a breakdown:
+	[Feature 1]: [Explanation]
+	[Feature 2]: [Explanation]
+	Let me know if you'd like further details!"_
+	Your priority is to deliver fast, accurate, and engaging responses that enhance the user’s experience while representing [Company Name] professionally
 	`
 	com, err := app.VerifyAPIKey(r.Header.Get("Authorization"))
 

@@ -1,5 +1,7 @@
 package data
 
+import "fmt"
+
 // get file content from file
 func GetContentFromFile(filepath, ext string) (string, error) {
 
@@ -9,8 +11,9 @@ func GetContentFromFile(filepath, ext string) (string, error) {
 	case ".docx":
 		return ExtractTextFromDocx(filepath)
 	case ".txt":
-
+		return ExtractTextFromTxt(filepath)
+	default:
+		return "", fmt.Errorf("file ext not supported")
 	}
 
-	return "", nil
 }

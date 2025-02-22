@@ -21,9 +21,9 @@ type About struct {
 
 type Document struct {
 	ID           string `json:"id,omitempty"`
-	Document     string `json:"document"`
+	Content      string `json:"content"`
 	DocumentPath string `json:"document_path"`
-	Embedding    []float32
+	Embedding    string `json:"embedding"`
 	CompanyID    string `json:"company_id,omitempty"`
 }
 type Settings struct {

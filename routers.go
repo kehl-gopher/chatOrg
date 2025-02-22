@@ -12,6 +12,7 @@ func (app *application) routers() http.Handler {
 
 	router.HandlerFunc(http.MethodPost, "/api/v1/company", app.RegisterCompany)
 	router.HandlerFunc(http.MethodPost, "/api/v1/about", app.AboutEndpoint)
+	router.HandlerFunc(http.MethodPost, "/api/v1/document", app.UploadDocument)
 	router.HandlerFunc(http.MethodPost, "/api/v1/chat", app.HandleChat)
 
 	// router.HandlerFunc(http.MethodPost, "/api/v1/webhook", app.webHook)

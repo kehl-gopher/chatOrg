@@ -1,7 +1,9 @@
 package data
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -79,11 +81,34 @@ func ExtractTextFromDocx(file string) (string, error) {
 		}
 	}
 
+	fmt.Println(textBuilder.String(), "doc builder")
 	return textBuilder.String(), nil
 }
 
+func ExtractTextFromTxt(file string) (string, error) {
+	f, err := os.Open(file)
 
+	if err != nil {
+		return "", err
+	}
 
-// func ExtractTextFromTxt(file string)(string, error)  {
-// 	doc, err := os.Open(file)
-// }
+	defer f.Close()
+	buf := make([]byte, 1024)
+
+	var textBuilder strings.Builder
+	for {
+		n, err := f.Read(buf)
+
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return "", err
+		}
+
+		textBuilder.WriteString(string(buf[:n]))
+		textBuilder.WriteString("\n")
+	}
+	return textBuilder.String(), nil
+
+}

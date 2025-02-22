@@ -7,7 +7,7 @@ import (
 
 // GenerateSecureAPIKey creates a 32-byte secure API key
 func GenerateSecureAPIKey() (string, error) {
-	bytes := make([]byte, 16)
+	bytes := make([]byte, 40)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
