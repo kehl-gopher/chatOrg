@@ -194,10 +194,10 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 	var Query struct {
 		Message  string `json:"message"`
 		Settings []struct {
-			Authorization string `json:"Authorization"`
-			Type          string `json:"type"`
-			Default       string `json:"default"`
-			Required      bool   `json:"required"`
+			Label    string `json:"label"`
+			Type     string `json:"type"`
+			Default  string `json:"default"`
+			Required bool   `json:"required"`
 		} `json:"settings"`
 	}
 
@@ -210,7 +210,7 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Query: %+v\n", Query)
 	app.writeResponse(w, http.StatusOK, toJson{"message": "Chat response generated successfully", "response": Query.Message})
 
-	com, err := app.model.Model.GetAPIKey(Query.Settings[0].Authorization)
+	com, err := app.model.Model.GetAPIKey(Query.Settings[0].Label)
 	if err != nil {
 		if errors.Is(err, models.ErrAPiKey) {
 			app.badErrorResponse(w, "Invalid API key provided")
