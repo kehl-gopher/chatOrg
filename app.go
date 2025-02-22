@@ -197,7 +197,7 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 			Authorization string `json:"Authorization"`
 			Type          string `json:"type"`
 			Default       string `json:"default"`
-		}
+		} `json:"settings"`
 	}
 
 	err := ReadJson(r, &Query)
