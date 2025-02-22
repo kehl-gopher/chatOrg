@@ -206,6 +206,7 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Query: %+v\n", Query)
 	app.writeResponse(w, http.StatusOK, toJson{"message": "Chat response generated successfully", "response": Query.Message})
 
 	com, err := app.model.Model.GetAPIKey(Query.Settings.Authorization)
@@ -259,6 +260,7 @@ func (app *application) HandleChat(w http.ResponseWriter, r *http.Request) {
 	}{
 		Response: resp.Choices[0].Message.Content,
 	}
+
 	app.writeResponse(w, http.StatusOK, toJson{"message": "Chat response generated successfully", "response": Response})
 
 }
