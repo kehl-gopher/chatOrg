@@ -14,7 +14,7 @@ The chatbot is a  feature of the **Telex** platform, enabling businesses to leve
 
 **⚠️ NOTE:**
 - **PDF upload is not fully supported yet.**
-- **File upload is not supported currently; documents are processed and stored in the database for embeddings.**
+<!-- - **File upload is not supported currently; documents are processed and stored in the database for embeddings.** -->
 
 2. **Processing Flow**
    - When a document is uploaded, the system **extracts text** from it.
@@ -43,7 +43,7 @@ url -iX POST "http://localhost:4000/api/v1/company" \
 {"company":{"id":"cusssc1d12354i9649i0",
 "name":"ExampleCorp",
 "email":"company133234@example.com","api_key":"e4586384fd37ccad237f1f588d475eab84f41013bc731969d20e9cdb12db2a24145e1e46de568eeb"},
-"message":"Company registered successfully"}   
+"message":"Company registered successfully"}
 ```
 ### 2. Add Company Information (About Section)
 - **Endpoint:** `/api/v1/about`
@@ -147,4 +147,3 @@ To integrate the chatbot with Telex ChatOrg:
 
 ## Conclusion
 The **Telex ChatOrg AI FAQ chatbot** allows businesses to automate customer support using AI-powered responses. By leveraging **document uploads and manual text entries**, the chatbot ensures accurate responses based on company-specific data, improving efficiency and customer satisfaction.
-
